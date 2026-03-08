@@ -28,6 +28,11 @@ header {
     color: #2C2620;
 }
 
+.header-title h1 a {
+    color: inherit;
+    text-decoration: none;
+}
+
 .header-title p.tagline {
     font-size: 0.95rem;
     color: #7A6E62;
