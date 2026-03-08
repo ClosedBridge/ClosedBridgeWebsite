@@ -129,6 +129,43 @@ footer {
     color: #9E9080;
 }
 
+/* ── Cart-Pole Simulation ─────────────────── */
+.simulation-section {
+    margin-top: 2.5rem;
+    text-align: center;
+}
+
+.simulation-section h2 {
+    font-size: 1.3rem;
+    font-weight: normal;
+    color: #3D342A;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.05em;
+}
+
+.sim-hint {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.78rem;
+    color: #7A6E62;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.sim-container {
+    border: 1px solid #D8CFBF;
+    border-radius: 2px;
+    overflow: hidden;
+    display: block;
+    width: 100%;
+}
+
+#cart-pole-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
 /* ── Stub pages ──────────────────────────── */
 .stub {
     text-align: center;

@@ -34,11 +34,98 @@
             <p>Hi, I'm Alex and this is my site for my company ClosedBridge!</p>
             <p>We specialize in embedded systems and controls engineering for various industries, with a focus on robotics.</p>
         </div>
+
+        <section class="simulation-section">
+            <h2>Inverted Pendulum Playground</h2>
+            <p class="sim-hint">Use ← → arrow keys to push the cart</p>
+            <div class="sim-container">
+                <canvas id="cart-pole-canvas"></canvas>
+            </div>
+        </section>
     </main>
 
     <footer>
         <p>&copy; 2025 ClosedBridge LLC</p>
     </footer>
 
+    <script src="node_modules/matter-js/build/matter.js"></script>
+    <script>
+        (function () {
+            const { Engine, Render, Runner, Bodies, Body, Composite, Constraint, Events } = Matter;
+
+            const W = 800, H = 350;
+            const canvas = document.getElementById('cart-pole-canvas');
+            canvas.width = W;
+            canvas.height = H;
+
+            const engine = Engine.create({ gravity: { y: 1 } });
+            const world = engine.world;
+
+            Render.run(Render.create({
+                canvas: canvas,
+                engine: engine,
+                options: { width: W, height: H, wireframes: false, background: '#EDE6D8' }
+            }));
+            Runner.run(Runner.create(), engine);
+
+            // Ground and rail
+            const railY = H - 50;
+            Composite.add(world, [
+                Bodies.rectangle(W / 2, H - 10, W, 20, { isStatic: true, render: { fillStyle: '#3D342A' } }),
+                Bodies.rectangle(W / 2, railY, W, 6,  { isStatic: true, render: { fillStyle: '#5C4F42' } })
+            ]);
+
+            // Cart
+            const cartW = 100, cartH = 28;
+            const cartX = W / 2, cartY = railY - cartH / 2;
+            const cart = Bodies.rectangle(cartX, cartY, cartW, cartH, {
+                frictionAir: 0.05,
+                friction: 0,
+                collisionFilter: { group: -1 },
+                render: { fillStyle: '#3D342A' }
+            });
+            Body.setInertia(cart, Infinity); // prevent cart rotation
+
+            // Pole
+            const poleLen = 150, poleW = 10;
+            const pole = Bodies.rectangle(cartX, cartY - cartH / 2 - poleLen / 2, poleW, poleLen, {
+                frictionAir: 0.006,
+                collisionFilter: { mask: 0 },
+                render: { fillStyle: '#8B5E3C' }
+            });
+            Body.setAngle(pole, 0.1); // small initial tilt so it falls
+
+            // Pin joint: bottom of pole to top of cart
+            const pivot = Constraint.create({
+                bodyA: cart, pointA: { x: 0, y: -cartH / 2 },
+                bodyB: pole, pointB: { x: 0, y: poleLen / 2 },
+                stiffness: 1, length: 0,
+                render: { visible: false }
+            });
+
+            Composite.add(world, [cart, pole, pivot]);
+
+            // Keyboard control
+            const keys = {};
+            document.addEventListener('keydown', e => { keys[e.key] = true; });
+            document.addEventListener('keyup',   e => { keys[e.key] = false; });
+
+            const force = 0.012;
+            const margin = cartW / 2 + 2;
+            Events.on(engine, 'beforeUpdate', () => {
+                if (keys['ArrowLeft'])  Body.applyForce(cart, cart.position, { x: -force, y: 0 });
+                if (keys['ArrowRight']) Body.applyForce(cart, cart.position, { x:  force, y: 0 });
+
+                // clamp cart to track bounds
+                if (cart.position.x < margin) {
+                    Body.setPosition(cart, { x: margin, y: cart.position.y });
+                    Body.setVelocity(cart, { x: 0, y: cart.velocity.y });
+                } else if (cart.position.x > W - margin) {
+                    Body.setPosition(cart, { x: W - margin, y: cart.position.y });
+                    Body.setVelocity(cart, { x: 0, y: cart.velocity.y });
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
