@@ -33,6 +33,7 @@
         <div class="intro">
             <p>Hi, I'm Alex and this is my site for my company ClosedBridge!</p>
             <p>We specialize in embedded systems and controls engineering for various industries, with a focus on robotics.</p>
+            <p>Feel free to reach out to schedule a consultation or discuss potential projects.</p>
         </div>
 
         <section class="simulation-section">
@@ -167,9 +168,9 @@
                 const cartVel = cart.velocity.x;
 
                 // Gains
-                const Kp_angle = 0.06;
+                const Kp_angle = 0.60;
                 const Kd_angle = 0.012;
-                const Kp_cart = 0.004;
+                const Kp_cart = 0.04;
                 const Kd_cart = 0.006;
 
                 // Angle error (target = 0 = upright)
@@ -190,7 +191,7 @@
                       + Kd_cart * (-cartVel / 10);
 
                 // Clamp output
-                return Math.max(-0.05, Math.min(0.05, f));
+                return -Math.max(-0.05, Math.min(0.05, f));
             }
 
             const SWITCH_TO_BALANCE = 2.0; // ~20 deg
