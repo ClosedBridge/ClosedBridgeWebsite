@@ -152,6 +152,40 @@ footer {
     margin-bottom: 1rem;
 }
 
+.sim-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#mode-toggle {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.5rem 1.4rem;
+    background-color: #3D342A;
+    color: #E8DFD0;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#mode-toggle:hover {
+    background-color: #5C4F42;
+}
+
+#controller-status {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.78rem;
+    color: #7A6E62;
+    letter-spacing: 0.09em;
+    min-width: 120px;
+}
+
 .sim-container {
     border: 1px solid #D8CFBF;
     border-radius: 2px;

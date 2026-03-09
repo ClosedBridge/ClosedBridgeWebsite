@@ -37,7 +37,11 @@
 
         <section class="simulation-section">
             <h2>Inverted Pendulum Playground</h2>
-            <p class="sim-hint">Use ← → arrow keys to push the cart</p>
+            <p class="sim-hint" id="sim-hint">Use ← → arrow keys to push the cart</p>
+            <div class="sim-controls">
+                <button id="mode-toggle">Mode: Manual</button>
+                <span id="controller-status"></span>
+            </div>
             <div class="sim-container">
                 <canvas id="cart-pole-canvas"></canvas>
             </div>
@@ -110,13 +114,127 @@
             document.addEventListener('keydown', e => { keys[e.key] = true; });
             document.addEventListener('keyup',   e => { keys[e.key] = false; });
 
-            const force = 0.012;
-            const margin = cartW / 2 + 2;
-            Events.on(engine, 'beforeUpdate', () => {
-                if (keys['ArrowLeft'])  Body.applyForce(cart, cart.position, { x: -force, y: 0 });
-                if (keys['ArrowRight']) Body.applyForce(cart, cart.position, { x:  force, y: 0 });
+            // --- Controller state ---
+            let autoMode = false;
+            let controllerState = 'swingup'; // 'swingup' or 'balance'
 
-                // clamp cart to track bounds
+            // PID state
+            let pidIntegral = 0;
+            let pidLastError = 0;
+
+            const toggleBtn = document.getElementById('mode-toggle');
+            const statusEl = document.getElementById('controller-status');
+            const hintEl = document.getElementById('sim-hint');
+
+            toggleBtn.addEventListener('click', () => {
+                autoMode = !autoMode;
+                toggleBtn.textContent = autoMode ? 'Mode: Autonomous' : 'Mode: Manual';
+                hintEl.textContent = autoMode
+                    ? 'Arrow keys apply perturbations'
+                    : 'Use ← → arrow keys to push the cart';
+                // Reset controller when switching to auto
+                if (autoMode) {
+                    controllerState = 'swingup';
+                    pidIntegral = 0;
+                    pidLastError = 0;
+                }
+                statusEl.textContent = autoMode ? '[ Swing-Up ]' : '';
+            });
+
+            // Normalize angle to [-π, π]
+            function normAngle(a) {
+                a = a % (2 * Math.PI);
+                if (a > Math.PI) a -= 2 * Math.PI;
+                if (a < -Math.PI) a += 2 * Math.PI;
+                return a;
+            }
+
+            // Swing-up: energy-based controller
+            // Pumps energy by pushing cart in direction of pole-tip horizontal velocity
+            function swingUpForce() {
+                const angle = normAngle(pole.angle);
+                const angVel = pole.angularVelocity;
+                // Pole tip x-velocity direction ∝ angVel * cos(angle)
+                const dir = Math.sign(angVel * Math.cos(angle));
+                return dir * 0.018;
+            }
+
+            // PID balance controller (state-feedback style)
+            function pidForce(dt) {
+                const angle = normAngle(pole.angle);
+                const angVel = pole.angularVelocity;
+                const cartPos = cart.position.x;
+                const cartVel = cart.velocity.x;
+
+                // Gains
+                const Kp_angle = 0.06;
+                const Kd_angle = 0.012;
+                const Kp_cart = 0.004;
+                const Kd_cart = 0.006;
+
+                // Angle error (target = 0 = upright)
+                const angleErr = -angle;
+
+                // Integral with anti-windup
+                pidIntegral += angleErr * dt;
+                pidIntegral = Math.max(-2, Math.min(2, pidIntegral));
+                const Ki_angle = 0.002;
+
+                // Cart centering
+                const cartErr = (W / 2 - cartPos) / W;
+
+                let f = Kp_angle * angleErr
+                      + Ki_angle * pidIntegral
+                      + Kd_angle * (-angVel)
+                      + Kp_cart * cartErr
+                      + Kd_cart * (-cartVel / 10);
+
+                // Clamp output
+                return Math.max(-0.05, Math.min(0.05, f));
+            }
+
+            const SWITCH_TO_BALANCE = 2.0; // ~20 deg
+            const SWITCH_TO_SWING   = 2.2; // ~31 deg (hysteresis)
+
+            const manualForce = 0.012;
+            const perturbForce = 0.008;
+            const margin = cartW / 2 + 2;
+
+            Events.on(engine, 'beforeUpdate', () => {
+                const dt = (engine.timing.lastDelta || 16.67) / 1000;
+
+                if (autoMode) {
+                    const angle = normAngle(pole.angle);
+
+                    // State transitions with hysteresis
+                    if (controllerState === 'swingup' && Math.abs(angle) < SWITCH_TO_BALANCE) {
+                        controllerState = 'balance';
+                        pidIntegral = 0;
+                        pidLastError = 0;
+                    } else if (controllerState === 'balance' && Math.abs(angle) > SWITCH_TO_SWING) {
+                        controllerState = 'swingup';
+                    }
+
+                    statusEl.textContent = controllerState === 'swingup'
+                        ? '[ Swing-Up ]'
+                        : '[ PID Balance ]';
+
+                    const fx = controllerState === 'swingup'
+                        ? swingUpForce()
+                        : pidForce(dt);
+
+                    Body.applyForce(cart, cart.position, { x: fx, y: 0 });
+
+                    // Arrow keys as perturbations in auto mode
+                    if (keys['ArrowLeft'])  Body.applyForce(cart, cart.position, { x: -perturbForce, y: 0 });
+                    if (keys['ArrowRight']) Body.applyForce(cart, cart.position, { x:  perturbForce, y: 0 });
+                } else {
+                    // Manual mode
+                    if (keys['ArrowLeft'])  Body.applyForce(cart, cart.position, { x: -manualForce, y: 0 });
+                    if (keys['ArrowRight']) Body.applyForce(cart, cart.position, { x:  manualForce, y: 0 });
+                }
+
+                // Clamp cart to track bounds
                 if (cart.position.x < margin) {
                     Body.setPosition(cart, { x: margin, y: cart.position.y });
                     Body.setVelocity(cart, { x: 0, y: cart.velocity.y });
