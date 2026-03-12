@@ -215,3 +215,51 @@ footer {
     margin-bottom: 1rem;
     color: #3D342A;
 }
+
+/* ── Mobile responsive ──────────────────── */
+@media (max-width: 600px) {
+    header {
+        padding: 1.2rem 1.2rem;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .header-title h1 img {
+        height: 40px !important;
+    }
+
+    .header-title p.tagline {
+        font-size: 0.75rem;
+    }
+
+    nav {
+        padding: 0;
+    }
+
+    nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    nav ul li a {
+        padding: 0.7rem 1rem;
+        font-size: 0.75rem;
+    }
+
+    main {
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .intro {
+        padding: 1.5rem 1rem;
+    }
+
+    .intro p {
+        font-size: 1rem;
+    }
+
+    #cart-pole-canvas {
+        touch-action: none;
+    }
+}

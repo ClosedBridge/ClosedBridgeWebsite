@@ -20,7 +20,7 @@
 
         <section class="simulation-section">
             <h2>Inverted Pendulum Playground</h2>
-            <p class="sim-hint" id="sim-hint">Use ← → arrow keys to push the cart</p>
+            <p class="sim-hint" id="sim-hint">Use ← → arrow keys or tap left/right on the canvas</p>
             <div class="sim-controls">
                 <button id="mode-toggle">Mode: Manual</button>
                 <span id="controller-status"></span>
@@ -96,6 +96,20 @@
             document.addEventListener('keydown', e => { keys[e.key] = true; });
             document.addEventListener('keyup',   e => { keys[e.key] = false; });
 
+            // Touch control — tap left/right half of canvas
+            let touchDir = 0;
+            canvas.addEventListener('touchstart', e => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const x = e.touches[0].clientX - rect.left;
+                touchDir = x < rect.width / 2 ? -1 : 1;
+            }, { passive: false });
+            canvas.addEventListener('touchend', e => {
+                e.preventDefault();
+                touchDir = 0;
+            }, { passive: false });
+            canvas.addEventListener('touchcancel', () => { touchDir = 0; });
+
             // --- Controller state ---
             let autoMode = false;
             let controllerState = 'swingup'; // 'swingup' or 'balance'
@@ -112,8 +126,8 @@
                 autoMode = !autoMode;
                 toggleBtn.textContent = autoMode ? 'Mode: Autonomous' : 'Mode: Manual';
                 hintEl.textContent = autoMode
-                    ? 'Arrow keys apply perturbations'
-                    : 'Use ← → arrow keys to push the cart';
+                    ? 'Tap or use arrow keys to apply perturbations'
+                    : 'Use ← → arrow keys or tap left/right on the canvas';
                 // Reset controller when switching to auto
                 if (autoMode) {
                     controllerState = 'swingup';
@@ -207,13 +221,13 @@
 
                     Body.applyForce(cart, cart.position, { x: fx, y: 0 });
 
-                    // Arrow keys as perturbations in auto mode
-                    if (keys['ArrowLeft'])  Body.applyForce(cart, cart.position, { x: -perturbForce, y: 0 });
-                    if (keys['ArrowRight']) Body.applyForce(cart, cart.position, { x:  perturbForce, y: 0 });
+                    // Arrow keys / touch as perturbations in auto mode
+                    if (keys['ArrowLeft']  || touchDir < 0) Body.applyForce(cart, cart.position, { x: -perturbForce, y: 0 });
+                    if (keys['ArrowRight'] || touchDir > 0) Body.applyForce(cart, cart.position, { x:  perturbForce, y: 0 });
                 } else {
                     // Manual mode
-                    if (keys['ArrowLeft'])  Body.applyForce(cart, cart.position, { x: -manualForce, y: 0 });
-                    if (keys['ArrowRight']) Body.applyForce(cart, cart.position, { x:  manualForce, y: 0 });
+                    if (keys['ArrowLeft']  || touchDir < 0) Body.applyForce(cart, cart.position, { x: -manualForce, y: 0 });
+                    if (keys['ArrowRight'] || touchDir > 0) Body.applyForce(cart, cart.position, { x:  manualForce, y: 0 });
                 }
 
                 // Clamp cart to track bounds
