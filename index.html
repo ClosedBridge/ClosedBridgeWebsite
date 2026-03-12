@@ -22,7 +22,8 @@
             <h2>Inverted Pendulum Playground</h2>
             <p class="sim-hint" id="sim-hint">Use ← → arrow keys or tap left/right on the canvas</p>
             <div class="sim-controls">
-                <button id="mode-toggle">Mode: Manual</button>
+                <button id="mode-toggle">Mode: Autonomous</button>
+                <button id="reset-sim">Reset</button>
                 <span id="controller-status"></span>
             </div>
             <div class="sim-container">
@@ -122,6 +123,21 @@
             const statusEl = document.getElementById('controller-status');
             const hintEl = document.getElementById('sim-hint');
 
+            function resetSim() {
+                Body.setPosition(cart, { x: cartX, y: cartY });
+                Body.setVelocity(cart, { x: 0, y: 0 });
+                Body.setAngle(pole, 0.1);
+                Body.setAngularVelocity(pole, 0);
+                Body.setPosition(pole, { x: cartX, y: cartY - cartH / 2 - poleLen / 2 });
+                Body.setVelocity(pole, { x: 0, y: 0 });
+                controllerState = 'swingup';
+                pidIntegral = 0;
+                pidLastError = 0;
+                if (autoMode) statusEl.textContent = '[ Swing-Up ]';
+            }
+
+            document.getElementById('reset-sim').addEventListener('click', resetSim);
+
             toggleBtn.addEventListener('click', () => {
                 autoMode = !autoMode;
                 toggleBtn.textContent = autoMode ? 'Mode: Autonomous' : 'Mode: Manual';
@@ -152,7 +168,8 @@
                 const angVel = pole.angularVelocity;
                 // Pole tip x-velocity direction ∝ angVel * cos(angle)
                 const dir = Math.sign(angVel * Math.cos(angle));
-                return dir * 0.018;
+                //return dir * 0.018;
+                return 0;
             }
 
             // PID balance controller (state-feedback style)

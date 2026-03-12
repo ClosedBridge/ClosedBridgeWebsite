@@ -160,7 +160,8 @@ footer {
     margin-bottom: 1rem;
 }
 
-#mode-toggle {
+#mode-toggle,
+#reset-sim {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     font-size: 0.82rem;
     letter-spacing: 0.08em;
@@ -174,7 +175,8 @@ footer {
     transition: background-color 0.2s;
 }
 
-#mode-toggle:hover {
+#mode-toggle:hover,
+#reset-sim:hover {
     background-color: #5C4F42;
 }
 
