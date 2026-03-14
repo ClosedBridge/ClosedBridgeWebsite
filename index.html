@@ -9,6 +9,14 @@
 <body>
 
     <div data-component="header"></div>
+
+    <div class="sim-controls">
+        <button id="mode-toggle">Mode: Autonomous</button>
+        <button id="reset-sim">Reset</button>
+        <span id="controller-status"></span>
+        <span class="sim-hint" id="sim-hint">Tap or use ← → to push the cart</span>
+    </div>
+
     <div data-component="nav"></div>
 
     <main>
@@ -17,19 +25,6 @@
             <p>We specialize in embedded systems and controls engineering for various industries, with a focus on robotics.</p>
             <p>Feel free to reach out to schedule a consultation or discuss potential projects.</p>
         </div>
-
-        <section class="simulation-section">
-            <h2>Inverted Pendulum Playground</h2>
-            <p class="sim-hint" id="sim-hint">Use ← → arrow keys or tap left/right on the canvas</p>
-            <div class="sim-controls">
-                <button id="mode-toggle">Mode: Autonomous</button>
-                <button id="reset-sim">Reset</button>
-                <span id="controller-status"></span>
-            </div>
-            <div class="sim-container">
-                <canvas id="cart-pole-canvas"></canvas>
-            </div>
-        </section>
     </main>
 
     <div data-component="footer"></div>
@@ -37,11 +32,17 @@
     <script src="components/load-components.js"></script>
     <script src="./node_modules/matter-js/build/matter.js"></script>
     <script>
-        (function () {
+        window.componentsReady.then(function () {
             const { Engine, Render, Runner, Bodies, Body, Composite, Constraint, Events } = Matter;
 
-            const W = 800, H = 350;
-            const canvas = document.getElementById('cart-pole-canvas');
+            // Create canvas and insert into header slot
+            const slot = document.getElementById('header-sim-slot');
+            if (!slot) return;
+            const canvas = document.createElement('canvas');
+            slot.appendChild(canvas);
+
+            // Sized to fit header — wide, matching logo height
+            const W = 600, H = 120;
             canvas.width = W;
             canvas.height = H;
 
@@ -51,19 +52,19 @@
             Render.run(Render.create({
                 canvas: canvas,
                 engine: engine,
-                options: { width: W, height: H, wireframes: false, background: '#EDE6D8' }
+                options: { width: W, height: H, wireframes: false, background: '#F4EFE6' }
             }));
             Runner.run(Runner.create(), engine);
 
             // Ground and rail
-            const railY = H - 50;
+            const railY = H - 18;
             Composite.add(world, [
-                Bodies.rectangle(W / 2, H - 10, W, 20, { isStatic: true, render: { fillStyle: '#3D342A' } }),
-                Bodies.rectangle(W / 2, railY, W, 6,  { isStatic: true, render: { fillStyle: '#5C4F42' } })
+                Bodies.rectangle(W / 2, H - 4, W, 8, { isStatic: true, render: { fillStyle: '#3D342A' } }),
+                Bodies.rectangle(W / 2, railY, W, 3, { isStatic: true, render: { fillStyle: '#5C4F42' } })
             ]);
 
             // Cart
-            const cartW = 100, cartH = 28;
+            const cartW = 40, cartH = 10;
             const cartX = W / 2, cartY = railY - cartH / 2;
             const cart = Bodies.rectangle(cartX, cartY, cartW, cartH, {
                 frictionAir: 0.05,
@@ -71,18 +72,18 @@
                 collisionFilter: { group: -1 },
                 render: { fillStyle: '#3D342A' }
             });
-            Body.setInertia(cart, Infinity); // prevent cart rotation
+            Body.setInertia(cart, Infinity);
 
             // Pole
-            const poleLen = 150, poleW = 10;
+            const poleLen = 60, poleW = 4;
             const pole = Bodies.rectangle(cartX, cartY - cartH / 2 - poleLen / 2, poleW, poleLen, {
                 frictionAir: 0.006,
                 collisionFilter: { mask: 0 },
                 render: { fillStyle: '#8B5E3C' }
             });
-            Body.setAngle(pole, 0.1); // small initial tilt so it falls
+            Body.setAngle(pole, 0.1);
 
-            // Pin joint: bottom of pole to top of cart
+            // Pin joint
             const pivot = Constraint.create({
                 bodyA: cart, pointA: { x: 0, y: -cartH / 2 },
                 bodyB: pole, pointB: { x: 0, y: poleLen / 2 },
@@ -97,7 +98,7 @@
             document.addEventListener('keydown', e => { keys[e.key] = true; });
             document.addEventListener('keyup',   e => { keys[e.key] = false; });
 
-            // Touch control — tap left/right half of canvas
+            // Touch control
             let touchDir = 0;
             canvas.addEventListener('touchstart', e => {
                 e.preventDefault();
@@ -111,9 +112,9 @@
             }, { passive: false });
             canvas.addEventListener('touchcancel', () => { touchDir = 0; });
 
-            // --- Controller state ---
+            // Controller state
             let autoMode = true;
-            let controllerState = 'swingup'; // 'swingup' or 'balance'
+            let controllerState = 'swingup';
 
             // PID state
             let pidIntegral = 0;
@@ -142,9 +143,8 @@
                 autoMode = !autoMode;
                 toggleBtn.textContent = autoMode ? 'Mode: Autonomous' : 'Mode: Manual';
                 hintEl.textContent = autoMode
-                    ? 'Tap or use arrow keys to apply perturbations'
-                    : 'Use ← → arrow keys or tap left/right on the canvas';
-                // Reset controller when switching to auto
+                    ? 'Tap or use ← → to perturb'
+                    : 'Tap or use ← → to push the cart';
                 if (autoMode) {
                     controllerState = 'swingup';
                     pidIntegral = 0;
@@ -153,7 +153,6 @@
                 statusEl.textContent = autoMode ? '[ Swing-Up ]' : '';
             });
 
-            // Normalize angle to [-π, π]
             function normAngle(a) {
                 a = a % (2 * Math.PI);
                 if (a > Math.PI) a -= 2 * Math.PI;
@@ -161,39 +160,30 @@
                 return a;
             }
 
-            // Swing-up: energy-based controller
-            // Pumps energy by pushing cart in direction of pole-tip horizontal velocity
             function swingUpForce() {
                 const angle = normAngle(pole.angle);
                 const angVel = pole.angularVelocity;
-                // Pole tip x-velocity direction ∝ angVel * cos(angle)
                 const dir = Math.sign(angVel * Math.cos(angle));
-                //return dir * 0.018;
-                return 0;
+                return dir * 0.003;
             }
 
-            // PID balance controller (state-feedback style)
             function pidForce(dt) {
                 const angle = normAngle(pole.angle);
                 const angVel = pole.angularVelocity;
                 const cartPos = cart.position.x;
                 const cartVel = cart.velocity.x;
 
-                // Gains
-                const Kp_angle = .05;
-                const Kd_angle = 0.05;
-                const Kp_cart = 0.04;
-                const Kd_cart = 0.006;
+                const Kp_angle = 0.008;
+                const Kd_angle = 0.008;
+                const Kp_cart = 0.006;
+                const Kd_cart = 0.001;
 
-                // Angle error (target = 0 = upright)
                 const angleErr = -angle;
 
-                // Integral with anti-windup
                 pidIntegral += angleErr * dt;
                 pidIntegral = Math.max(-2, Math.min(2, pidIntegral));
-                const Ki_angle = 0.002;
+                const Ki_angle = 0.0003;
 
-                // Cart centering
                 const cartErr = (W / 2 - cartPos) / W;
 
                 let f = Kp_angle * angleErr
@@ -202,15 +192,14 @@
                       + Kp_cart * cartErr
                       + Kd_cart * (-cartVel / 10);
 
-                // Clamp output
-                return -Math.max(-0.05, Math.min(0.05, f));
+                return -Math.max(-0.008, Math.min(0.008, f));
             }
 
-            const SWITCH_TO_BALANCE = 2.0; // ~20 deg
-            const SWITCH_TO_SWING   = 2.2; // ~31 deg (hysteresis)
+            const SWITCH_TO_BALANCE = 2.0;
+            const SWITCH_TO_SWING   = 2.2;
 
-            const manualForce = 0.012;
-            const perturbForce = 0.008;
+            const manualForce = 0.002;
+            const perturbForce = 0.0013;
             const margin = cartW / 2 + 2;
 
             Events.on(engine, 'beforeUpdate', () => {
@@ -219,7 +208,6 @@
                 if (autoMode) {
                     const angle = normAngle(pole.angle);
 
-                    // State transitions with hysteresis
                     if (controllerState === 'swingup' && Math.abs(angle) < SWITCH_TO_BALANCE) {
                         controllerState = 'balance';
                         pidIntegral = 0;
@@ -238,16 +226,13 @@
 
                     Body.applyForce(cart, cart.position, { x: fx, y: 0 });
 
-                    // Arrow keys / touch as perturbations in auto mode
                     if (keys['ArrowLeft']  || touchDir < 0) Body.applyForce(cart, cart.position, { x: -perturbForce, y: 0 });
                     if (keys['ArrowRight'] || touchDir > 0) Body.applyForce(cart, cart.position, { x:  perturbForce, y: 0 });
                 } else {
-                    // Manual mode
                     if (keys['ArrowLeft']  || touchDir < 0) Body.applyForce(cart, cart.position, { x: -manualForce, y: 0 });
                     if (keys['ArrowRight'] || touchDir > 0) Body.applyForce(cart, cart.position, { x:  manualForce, y: 0 });
                 }
 
-                // Clamp cart to track bounds
                 if (cart.position.x < margin) {
                     Body.setPosition(cart, { x: margin, y: cart.position.y });
                     Body.setVelocity(cart, { x: 0, y: cart.velocity.y });
@@ -256,7 +241,7 @@
                     Body.setVelocity(cart, { x: 0, y: cart.velocity.y });
                 }
             });
-        })();
+        });
     </script>
 </body>
 </html>

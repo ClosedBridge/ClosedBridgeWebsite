@@ -1,4 +1,4 @@
-(async function () {
+window.componentsReady = (async function () {
     const components = document.querySelectorAll('[data-component]');
     for (const el of components) {
         const name = el.getAttribute('data-component');
@@ -30,3 +30,4 @@
         });
     }
 })();
+
