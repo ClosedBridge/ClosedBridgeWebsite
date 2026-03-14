@@ -50,9 +50,8 @@
             Runner.run(Runner.create(), engine);
 
             // Ground and rail
-            const railY = H - 18;
+            const railY = H;
             Composite.add(world, [
-                Bodies.rectangle(W / 2, H - 4, W, 8, { isStatic: true, render: { fillStyle: '#3D342A' } }),
                 Bodies.rectangle(W / 2, railY, W, 3, { isStatic: true, render: { fillStyle: '#5C4F42' } })
             ]);
 
