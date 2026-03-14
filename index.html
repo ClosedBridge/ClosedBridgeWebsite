@@ -10,13 +10,6 @@
 
     <div data-component="header"></div>
 
-    <div class="sim-controls">
-        <button id="mode-toggle">Mode: Autonomous</button>
-        <button id="reset-sim">Reset</button>
-        <span id="controller-status"></span>
-        <span class="sim-hint" id="sim-hint">Tap or use ← → to push the cart</span>
-    </div>
-
     <div data-component="nav"></div>
 
     <main>
@@ -120,10 +113,6 @@
             let pidIntegral = 0;
             let pidLastError = 0;
 
-            const toggleBtn = document.getElementById('mode-toggle');
-            const statusEl = document.getElementById('controller-status');
-            const hintEl = document.getElementById('sim-hint');
-
             function resetSim() {
                 Body.setPosition(cart, { x: cartX, y: cartY });
                 Body.setVelocity(cart, { x: 0, y: 0 });
@@ -134,24 +123,26 @@
                 controllerState = 'swingup';
                 pidIntegral = 0;
                 pidLastError = 0;
-                if (autoMode) statusEl.textContent = '[ Swing-Up ]';
             }
 
             document.getElementById('reset-sim').addEventListener('click', resetSim);
 
-            toggleBtn.addEventListener('click', () => {
-                autoMode = !autoMode;
-                toggleBtn.textContent = autoMode ? 'Mode: Autonomous' : 'Mode: Manual';
-                hintEl.textContent = autoMode
-                    ? 'Tap or use ← → to perturb'
-                    : 'Tap or use ← → to push the cart';
-                if (autoMode) {
-                    controllerState = 'swingup';
-                    pidIntegral = 0;
-                    pidLastError = 0;
-                }
-                statusEl.textContent = autoMode ? '[ Swing-Up ]' : '';
-            });
+            // Button-based direction controls
+            let btnDir = 0;
+            const leftBtn = document.getElementById('sim-left');
+            const rightBtn = document.getElementById('sim-right');
+
+            leftBtn.addEventListener('mousedown', () => { btnDir = -1; });
+            leftBtn.addEventListener('mouseup', () => { btnDir = 0; });
+            leftBtn.addEventListener('mouseleave', () => { btnDir = 0; });
+            leftBtn.addEventListener('touchstart', e => { e.preventDefault(); btnDir = -1; }, { passive: false });
+            leftBtn.addEventListener('touchend', e => { e.preventDefault(); btnDir = 0; }, { passive: false });
+
+            rightBtn.addEventListener('mousedown', () => { btnDir = 1; });
+            rightBtn.addEventListener('mouseup', () => { btnDir = 0; });
+            rightBtn.addEventListener('mouseleave', () => { btnDir = 0; });
+            rightBtn.addEventListener('touchstart', e => { e.preventDefault(); btnDir = 1; }, { passive: false });
+            rightBtn.addEventListener('touchend', e => { e.preventDefault(); btnDir = 0; }, { passive: false });
 
             function normAngle(a) {
                 a = a % (2 * Math.PI);
@@ -216,21 +207,17 @@
                         controllerState = 'swingup';
                     }
 
-                    statusEl.textContent = controllerState === 'swingup'
-                        ? '[ Swing-Up ]'
-                        : '[ PID Balance ]';
-
                     const fx = controllerState === 'swingup'
                         ? swingUpForce()
                         : pidForce(dt);
 
                     Body.applyForce(cart, cart.position, { x: fx, y: 0 });
 
-                    if (keys['ArrowLeft']  || touchDir < 0) Body.applyForce(cart, cart.position, { x: -perturbForce, y: 0 });
-                    if (keys['ArrowRight'] || touchDir > 0) Body.applyForce(cart, cart.position, { x:  perturbForce, y: 0 });
+                    if (keys['ArrowLeft']  || touchDir < 0 || btnDir < 0) Body.applyForce(cart, cart.position, { x: -perturbForce, y: 0 });
+                    if (keys['ArrowRight'] || touchDir > 0 || btnDir > 0) Body.applyForce(cart, cart.position, { x:  perturbForce, y: 0 });
                 } else {
-                    if (keys['ArrowLeft']  || touchDir < 0) Body.applyForce(cart, cart.position, { x: -manualForce, y: 0 });
-                    if (keys['ArrowRight'] || touchDir > 0) Body.applyForce(cart, cart.position, { x:  manualForce, y: 0 });
+                    if (keys['ArrowLeft']  || touchDir < 0 || btnDir < 0) Body.applyForce(cart, cart.position, { x: -manualForce, y: 0 });
+                    if (keys['ArrowRight'] || touchDir > 0 || btnDir > 0) Body.applyForce(cart, cart.position, { x:  manualForce, y: 0 });
                 }
 
                 if (cart.position.x < margin) {
