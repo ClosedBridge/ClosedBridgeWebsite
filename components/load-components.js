@@ -17,6 +17,16 @@ window.componentsReady = (async function () {
         }
     }
 
+    // Mobile: hamburger menu toggle
+    const hamburger = document.getElementById('nav-hamburger');
+    const navMenu = document.querySelector('nav > ul');
+    if (hamburger && navMenu) {
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('nav-open');
+            hamburger.classList.toggle('active');
+        });
+    }
+
     // Mobile: toggle dropdowns on tap
     const dropdowns = document.querySelectorAll('.nav-dropdown');
     for (const dd of dropdowns) {
