@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careers – ClosedBridge LLC</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .careers-intro {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 3rem;
+        }
+
+        .careers-intro p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #3D342A;
+        }
+
+        .job-listing {
+            background-color: #EDE6D8;
+            border: 1px solid #D8CFBF;
+            border-radius: 2px;
+            padding: 2.5rem 3rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .job-listing h3 {
+            font-size: 1.4rem;
+            font-weight: normal;
+            color: #2C2620;
+            margin-bottom: 0.3rem;
+        }
+
+        .job-meta {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.82rem;
+            color: #7A6E62;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .job-listing h4 {
+            font-size: 1rem;
+            font-weight: normal;
+            color: #3D342A;
+            margin: 1.5rem 0 0.6rem;
+            letter-spacing: 0.03em;
+            border-bottom: 1px solid #D8CFBF;
+            padding-bottom: 0.3rem;
+        }
+
+        .job-listing ul {
+            list-style: disc;
+            margin-left: 1.4rem;
+            color: #3D342A;
+        }
+
+        .job-listing li {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 0.3rem;
+        }
+
+        .job-listing p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #3D342A;
+        }
+
+        .job-apply {
+            margin-top: 1.5rem;
+        }
+
+        .job-apply a {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #3D342A;
+            text-decoration: none;
+            border: 1px solid #3D342A;
+            padding: 0.5rem 1.4rem;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .job-apply a:hover {
+            background-color: #3D342A;
+            color: #F4EFE6;
+        }
+
+        @media (max-width: 600px) {
+            .job-listing {
+                padding: 1.5rem 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div data-component="header"></div>
+    <div data-component="nav"></div>
+
+    <main>
+        <div class="careers-intro">
+            <h2>Careers at ClosedBridge</h2>
+            <p>We're looking for engineers who are passionate about building robust, real-time systems that operate at the boundary of hardware and software. See our open positions below.</p>
+        </div>
+
+        <div class="job-listing">
+            <h3>Senior Firmware Engineer</h3>
+            <p class="job-meta">Full-Time · Remote / On-Site</p>
+
+            <h4>About the Role</h4>
+            <p>We're looking for a Senior Firmware Engineer to architect and implement production firmware for resource-constrained embedded platforms. You'll work across the full firmware stack — from bare-metal peripheral drivers and RTOS task design to high-speed industrial communication protocols — shipping code that runs on hardware in the field.</p>
+
+            <h4>Requirements</h4>
+            <ul>
+                <li>Proficiency with modern C++ (C++17/20) on resource-constrained microcontrollers</li>
+                <li>Hands-on experience with TI C2000 and/or STM32 MCU families</li>
+                <li>Experience developing with FreeRTOS (task management, synchronization primitives, memory allocation strategies)</li>
+                <li>Working knowledge of EtherCAT industrial communication protocol (stack integration, slave/master development)</li>
+                <li>Experience offloading work to DMA controllers for high-throughput, low-latency data movement</li>
+                <li>Familiarity with compute hardware accelerators (CLA, CMSIS-DSP, FPU pipelines, hardware math blocks)</li>
+                <li>Comfortable reading schematics and datasheets, and working closely with hardware teams</li>
+                <li>Strong debugging skills — oscilloscopes, logic analyzers, JTAG/SWD</li>
+            </ul>
+
+            <h4>Nice to Have</h4>
+            <ul>
+                <li>Motor control experience (FOC, six-step commutation, sensorless techniques)</li>
+                <li>PID control system design and tuning for real-time applications</li>
+                <li>Experience with other industrial protocols (CANopen, EtherNet/IP, PROFINET)</li>
+                <li>Contributions to open-source embedded projects</li>
+            </ul>
+
+            <div class="job-apply">
+                <a href="mailto:closedbridge@gmail.com?subject=Application%20–%20Senior%20Firmware%20Engineer">Apply via Email</a>
+            </div>
+        </div>
+
+        <div class="job-listing">
+            <h3>Embedded Controls Engineer</h3>
+            <p class="job-meta">Full-Time · Remote / On-Site</p>
+
+            <h4>About the Role</h4>
+            <p>We're seeking an Embedded Controls Engineer to design, simulate, and deploy advanced control algorithms on embedded hardware. You'll bridge the gap between control theory and real-time implementation — taking systems from simulation through to production deployment on resource-constrained devices.</p>
+
+            <h4>Requirements</h4>
+            <ul>
+                <li>Strong foundation in control theory and practical experience deploying controllers on embedded targets</li>
+                <li>Proficiency with MATLAB/Simulink for system modeling, controller design, and code generation</li>
+                <li>Experience with inverse kinematics for robotic or multi-axis systems</li>
+                <li>Familiarity with modern control techniques including Model Predictive Control (MPC), Reinforcement Learning (RL), LQR/LQG, adaptive control, and state estimation (Kalman filtering)</li>
+                <li>Proficiency in Python for prototyping, data analysis, and control algorithm development</li>
+                <li>Working knowledge of C or C++ for embedded implementation</li>
+                <li>Experience deploying control algorithms on resource-constrained devices with hard real-time requirements</li>
+                <li>Ability to validate controller performance through simulation-to-hardware workflows (SIL/HIL)</li>
+            </ul>
+
+            <h4>Nice to Have</h4>
+            <ul>
+                <li>Experience with STM32 and/or TI C2000 microcontroller platforms</li>
+                <li>Familiarity with EtherCAT for real-time distributed control</li>
+                <li>Experience with ROS/ROS2 for robotics integration</li>
+                <li>Background in dynamics modeling and system identification</li>
+            </ul>
+
+            <div class="job-apply">
+                <a href="mailto:closedbridge@gmail.com?subject=Application%20–%20Embedded%20Controls%20Engineer">Apply via Email</a>
+            </div>
+        </div>
+    </main>
+
+    <div data-component="footer"></div>
+
+    <script src="components/load-components.js"></script>
+</body>
+</html>

@@ -73,13 +73,17 @@ nav {
     padding: 0 4rem;
 }
 
-nav ul {
+nav > ul {
     list-style: none;
     display: flex;
     gap: 0;
 }
 
-nav ul li a {
+nav > ul > li {
+    position: relative;
+}
+
+nav a {
     display: block;
     padding: 1rem 1.8rem;
     color: #E8DFD0;
@@ -91,8 +95,38 @@ nav ul li a {
     transition: background-color 0.2s, color 0.2s;
 }
 
-nav ul li a:hover,
-nav ul li a.active {
+nav > ul > li > a:hover,
+nav > ul > li > a.active,
+nav > ul > li:hover > a {
+    background-color: #5C4F42;
+    color: #F4EFE6;
+}
+
+/* ── Dropdown menus ──────────────────────── */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    list-style: none;
+    background-color: #3D342A;
+    min-width: 200px;
+    z-index: 100;
+    border-top: 2px solid #5C4F42;
+}
+
+.nav-dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li a {
+    padding: 0.75rem 1.4rem;
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+.dropdown-menu li a:hover,
+.dropdown-menu li a.active {
     background-color: #5C4F42;
     color: #F4EFE6;
 }
@@ -238,14 +272,30 @@ footer {
         padding: 0;
     }
 
-    nav ul {
+    nav > ul {
         flex-wrap: wrap;
         justify-content: center;
     }
 
-    nav ul li a {
+    nav a {
         padding: 0.7rem 1rem;
         font-size: 0.75rem;
+    }
+
+    .dropdown-menu {
+        position: static;
+        border-top: none;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .nav-dropdown.open .dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-menu li a {
+        padding: 0.6rem 2rem;
+        font-size: 0.72rem;
     }
 
     main {

@@ -19,6 +19,7 @@ The `fetch()`-based component loader requires HTTP serving; `file://` URLs won't
 - **Component system**: Shared header, nav, and footer live in `components/`. Pages use `<div data-component="header"></div>` placeholders, injected at runtime by `components/load-components.js`. The loader also auto-sets the `active` class on nav links based on the current URL.
 - **Physics simulation**: The homepage (`index.html`) has an inverted pendulum cart-pole simulation using **Matter.js** (loaded from `node_modules`). It has two modes: manual (arrow keys) and autonomous (energy-based swing-up + PID balance controller with hysteresis switching).
 - **Resume submodule**: `Resume/` is a git submodule (LaTeX source → HTML/PDF). The resume page embeds the HTML version in an iframe.
+- **Mobile compatibility**: Should be compatible and usable on mobile devices as well
 
 ## Key Files
 

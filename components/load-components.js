@@ -16,4 +16,17 @@
             link.classList.add('active');
         }
     }
+
+    // Mobile: toggle dropdowns on tap
+    const dropdowns = document.querySelectorAll('.nav-dropdown');
+    for (const dd of dropdowns) {
+        dd.querySelector('.dropdown-toggle').addEventListener('click', e => {
+            e.preventDefault();
+            // Close other open dropdowns
+            for (const other of dropdowns) {
+                if (other !== dd) other.classList.remove('open');
+            }
+            dd.classList.toggle('open');
+        });
+    }
 })();
